@@ -1,0 +1,16 @@
+ansible
+argcomplete
+pycodestyle
+black
+ansible-lint
+molecule
+molecule-plugins[docker]
+docker
+flake8
+flake8-bugbear
+flake8-docstrings
+flake8-import-order
+flake8-pylint
+pytest
+pytest-testinfra
+yamllint

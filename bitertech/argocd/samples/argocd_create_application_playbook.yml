@@ -1,0 +1,23 @@
+# argocd_create_application_playbook.yml
+- name: Create ArgoCD Application
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Create ArgoCD Application
+      bitertech.argocd.argocd_create_application:
+        api_url: "http://argocd.localhost/api/v1"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
+        name: "my-app-ds01"
+        repository_url: "https://github.com/jorge-romero/project-argocd-deploy.git"
+        path: "DES"
+        target_revision: "main"
+        namespace: "apps-gitops"
+        values_files: "values.d01.yaml"
+        destination_server: "https://kubernetes.default.svc"
+        project: "argocdexample-project"
+      register: result
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result
