@@ -23,14 +23,13 @@ def main():
     fields = {
         "api_url": {"required": True, "type": 'str'},
         "token": {"required": True, "type": 'str'},
-        "name": {"required": True, "type": 'str'},
+        "type": {"required": True, "type": 'str'},
         "repository_url": {"required": True, "type": 'str'},
-        "path": {"required": True, "type": 'str'},
-        "target_revision": {"required": True, "type": 'str'},
-        "namespace": {"required": True, "type": 'str'},
-        "values_files": {"required": False, "type": 'str'},
-        "destination_server": {"required": False, "type": 'str'},
-        "project": {"required": False, "type": "str"}
+        "username": {"required": True, "type": 'str'},
+        "password": {"required": True, "type": 'str'},
+        "project": {"required": False, "type": "str"},
+        "name": {"required": False, "type": "str"},
+        "status": {"type": "str", "choices": ["present", "absent"], "default": "present"}
     }
 
     module = AnsibleModule(
@@ -39,25 +38,26 @@ def main():
 
     api_url = module.params["api_url"]
     token = module.params["token"]
-    name = module.params["name"]
+    type = module.params["type"]
     repository_url = module.params["repository_url"]
-    path = module.params["path"]
-    target_revision = module.params["target_revision"]
-    namespace = module.params["namespace"]
-    values_files = module.params["values_files"]
-    destination_server = module.params["destination_server"]
+    username = module.params["username"]
+    password = module.params["password"]
     project = module.params["project"]
+    name = module.params["name"]
+    status = module.params["status"]
 
     try:
         client = ArgoCDClient(api_url, token)
-        result = client.create_application(name,
-                                           repository_url,
-                                           path,
-                                           target_revision,
-                                           values_files=values_files,
-                                           destination_server=destination_server,
-                                           namespace=namespace,
-                                           project=project)
+        if status == "present":
+            result = client.create_repository(
+                type,
+                repository_url,
+                username,
+                password,
+                project,
+                name
+            )
+
         module.exit_json(changed=True, result=result)
     except requests.exceptions.HTTPError as errh:
         module.fail_json(msg=str(errh.response.json()))
