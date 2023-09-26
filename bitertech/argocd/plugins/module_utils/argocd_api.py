@@ -213,3 +213,50 @@ class ArgoCDClient:
 
         updated_project_data.raise_for_status()
         return updated_project_data.json(), None
+
+    def add_remove_groups_to_role(self, project_name, role_name, groups, status):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        project_data.raise_for_status()
+
+        # Step 2: Parse the JSON response
+        project_json = project_data.json()
+
+        # Step 3: Add the new role data to the "roles" section
+        roles = project_json.get("spec", {}).get("roles", [])
+
+        target_role = None
+        for role in roles:
+            if role["name"] == role_name:
+                target_role = role
+                break
+
+        if target_role is None:
+            return {"error": "Role '{role_name}' not found in project"}, None
+
+        if "groups" not in target_role:
+            target_role["groups"] = []
+
+        if status == "present":
+            for group in groups:
+                if group not in target_role["groups"]:
+                    target_role["groups"].append(group)
+
+        if status == "absent":
+            for group in groups:
+                if group in target_role["groups"]:
+                    target_role["groups"].remove(group)
+
+        # Step 4: Update the project with the modified data
+        updated_project_data = requests.put(
+            f"{self.argo_api_url}/projects/{project_name}",
+            headers=self.headers,
+            data=json.dumps({"project": project_json}),
+            timeout=30
+        )
+
+        updated_project_data.raise_for_status()
+        return updated_project_data.json(), None

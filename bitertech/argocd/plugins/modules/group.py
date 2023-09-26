@@ -20,7 +20,7 @@ def main():
         "token": {"required": True, "type": 'str'},
         "project_name": {"required": True, "type": 'str'},
         "role_name": {"required": True, "type": 'str'},
-        "policies": {"required": True, "type": 'list'},
+        "groups": {"required": True, "type": 'list'},
         "status": {"type": "str", "choices": ["present", "absent"], "default": "present"},
 
     }
@@ -33,14 +33,14 @@ def main():
     token = module.params["token"]
     project_name = module.params["project_name"]
     role_name = module.params["role_name"]
-    policies = module.params["policies"]
+    groups = module.params["groups"]
     status = module.params["status"]
 
     try:
         client = ArgoCDClient(api_url, token)
 
-        result = client.add_remove_policies_to_role(
-            project_name, role_name, policies, status)
+        result = client.add_remove_groups_to_role(
+            project_name, role_name, groups, status)
 
         module.exit_json(changed=True, result=result)
     except requests.exceptions.HTTPError as errh:
