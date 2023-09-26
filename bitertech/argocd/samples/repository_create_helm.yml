@@ -1,0 +1,23 @@
+# argocd_create_project_playbook.yml
+- name: Create Repository
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Create Repository
+      bitertech.argocd.repository:
+        api_url: "http://argocd.localhost/api/v1"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
+        type: "helm"
+        name: "myrepo"
+        repository_url: "https://github.com/jorge-romero/alab.git"
+        username: "jorge.romeropalma@gmail.com"
+        password: "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"
+        project: "default"
+        status: "present"
+
+      register: result
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result

@@ -260,3 +260,31 @@ class ArgoCDClient:
 
         updated_project_data.raise_for_status()
         return updated_project_data.json(), None
+
+    def create_repository(self,
+                          type,
+                          repository_url,
+                          username,
+                          password,
+                          project,
+                          name):
+        # Define the repository spec
+        repository_spec = {
+            "type": type,
+            "repo": repository_url,
+            "username": username,
+            "password": password,
+            "project": project
+        }
+        if type == "helm":
+            repository_spec["name"] = name
+
+        # Create the repository
+        response = requests.post(f"{self.argo_api_url}/repositories",
+                                 headers=self.headers,
+                                 data=json.dumps(repository_spec),
+                                 timeout=30)
+
+        response.raise_for_status()
+
+        return response.json(), None
