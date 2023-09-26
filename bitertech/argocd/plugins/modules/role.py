@@ -20,7 +20,9 @@ def main():
         "token": {"required": True, "type": 'str'},
         "project_name": {"required": True, "type": 'str'},
         "role_name": {"required": True, "type": 'str'},
-        "role_description": {"required": True, "type": 'str'}
+        "role_description": {"required": True, "type": 'str'},
+        "status": {"type": "str", "choices": ["present", "absent"], "default": "present"},
+
     }
 
     module = AnsibleModule(
@@ -32,11 +34,17 @@ def main():
     project_name = module.params["project_name"]
     role_name = module.params["role_name"]
     role_description = module.params["role_description"]
+    status = module.params["status"]
 
     try:
         client = ArgoCDClient(api_url, token)
-        result = client.add_role_to_project(
-            project_name, role_name, role_description)
+
+        if status == "present":
+            result = client.add_role_to_project(
+                project_name, role_name, role_description)
+        if status == "absent":
+            result = client.remove_role_from_project(
+                project_name, role_name)
         module.exit_json(changed=True, result=result)
     except requests.exceptions.HTTPError as errh:
         module.fail_json(msg=str(errh.response.json()))

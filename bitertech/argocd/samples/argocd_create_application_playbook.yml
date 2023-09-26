@@ -5,7 +5,7 @@
   gather_facts: false
   tasks:
     - name: Create ArgoCD Application
-      bitertech.argocd.argocd_create_application:
+      bitertech.argocd.application:
         api_url: "http://argocd.localhost/api/v1"
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
         name: "my-app-ds01"

@@ -56,17 +56,25 @@ class ArgoCDClient:
         response = requests.post(f"{self.argo_api_url}/applications",
                                  headers=self.headers,
                                  data=json.dumps(application_spec),
-                                 timeout=10000)
+                                 timeout=30)
 
         response.raise_for_status()
         return response.json()
 
-    def create_project(self, name, description):
+    def create_project(self, project_name, description):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        if project_data.status_code == 200:
+            return project_data.json(), None
+
         # Define the project spec
         project_spec = {
             "project": {
                 "metadata": {
-                    "name": name,
+                    "name": project_name,
                     "description": description
                 }
             }
@@ -76,15 +84,43 @@ class ArgoCDClient:
         response = requests.post(f"{self.argo_api_url}/projects",
                                  headers=self.headers,
                                  data=json.dumps(project_spec),
-                                 timeout=10000)
+                                 timeout=30)
+
+        response.raise_for_status()
+
+        return response.json(), None
+
+    def update_project(self, project_name, description):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        project_data.raise_for_status()
+
+        # Step 2: Parse the JSON response
+        project_json = project_data.json()
+
+        project_json["metadata"]["name"] = project_name
+        project_json["metadata"]["description"] = description
+
+        # Create the project
+        response = requests.put(f"{self.argo_api_url}/projects/{project_name}",
+                                headers=self.headers,
+                                data=json.dumps({"project": project_json}),
+                                timeout=30)
 
         response.raise_for_status()
         return response.json()
 
+    # To be implemented
+    def delete_project(self, name):
+        return {}, None
+
     def get_project(self, name):
         response = requests.get(f"{self.argo_api_url}/projects/{name}",
                                 headers=self.headers,
-                                timeout=10000)
+                                timeout=30)
 
         response.raise_for_status()
         return response.json()
@@ -93,7 +129,7 @@ class ArgoCDClient:
         # Step 1: Get the project data
         project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
                                     headers=self.headers,
-                                    timeout=10000)
+                                    timeout=30)
 
         project_data.raise_for_status()
 
@@ -121,7 +157,58 @@ class ArgoCDClient:
             f"{self.argo_api_url}/projects/{project_name}",
             headers=self.headers,
             data=json.dumps({"project": project_json}),
-            timeout=10000
+            timeout=30
+        )
+
+        updated_project_data.raise_for_status()
+        return updated_project_data.json(), None
+
+    def remove_role_from_project(self, project_name, role_name):
+        # To be implemented
+        return {}, None
+
+    def add_remove_policies_to_role(self, project_name, role_name, policies, status):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        project_data.raise_for_status()
+
+        # Step 2: Parse the JSON response
+        project_json = project_data.json()
+
+        # Step 3: Add the new role data to the "roles" section
+        roles = project_json.get("spec", {}).get("roles", [])
+
+        target_role = None
+        for role in roles:
+            if role["name"] == role_name:
+                target_role = role
+                break
+
+        if target_role is None:
+            return {"error": "Role '{role_name}' not found in project"}, None
+
+        if "policies" not in target_role:
+            target_role["policies"] = []
+
+        if status == "present":
+            for policy in policies:
+                if policy not in target_role["policies"]:
+                    target_role["policies"].append(policy)
+
+        if status == "absent":
+            for policy in policies:
+                if policy in target_role["policies"]:
+                    target_role["policies"].remove(policy)
+
+        # Step 4: Update the project with the modified data
+        updated_project_data = requests.put(
+            f"{self.argo_api_url}/projects/{project_name}",
+            headers=self.headers,
+            data=json.dumps({"project": project_json}),
+            timeout=30
         )
 
         updated_project_data.raise_for_status()

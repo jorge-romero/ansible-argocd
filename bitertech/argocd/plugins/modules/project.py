@@ -19,7 +19,8 @@ def main():
         "api_url": {"required": True, "type": 'str'},
         "token": {"required": True, "type": 'str'},
         "name": {"required": True, "type": 'str'},
-        "description": {"required": True, "type": 'str'}
+        "description": {"required": True, "type": 'str'},
+        "status": {"type": "str", "choices": ["present", "absent", "update"], "default": "present"}
     }
 
     module = AnsibleModule(
@@ -30,11 +31,16 @@ def main():
     token = module.params["token"]
     name = module.params["name"]
     description = module.params["description"]
+    status = module.params["status"]
 
     try:
         client = ArgoCDClient(api_url, token)
-        result = client.create_project(name,
-                                       description)
+        if status == "present":
+            result = client.create_project(name, description)
+        if status == "update":
+            result = client.update_project(name, description)
+        if status == "absent":
+            result = client.delete_project(name, description)
         module.exit_json(changed=True, result=result)
     except requests.exceptions.HTTPError as errh:
         module.fail_json(msg=str(errh.response.json()))

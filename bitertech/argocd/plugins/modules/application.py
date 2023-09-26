@@ -30,7 +30,8 @@ def main():
         "namespace": {"required": True, "type": 'str'},
         "values_files": {"required": False, "type": 'str'},
         "destination_server": {"required": False, "type": 'str'},
-        "project": {"required": False, "type": "str"}
+        "project": {"required": False, "type": "str"},
+        "status": {"type": "str", "choices": ["present", "absent"], "default": "present"}
     }
 
     module = AnsibleModule(
@@ -47,17 +48,19 @@ def main():
     values_files = module.params["values_files"]
     destination_server = module.params["destination_server"]
     project = module.params["project"]
+    status = module.params["status"]
 
     try:
         client = ArgoCDClient(api_url, token)
-        result = client.create_application(name,
-                                           repository_url,
-                                           path,
-                                           target_revision,
-                                           values_files=values_files,
-                                           destination_server=destination_server,
-                                           namespace=namespace,
-                                           project=project)
+        if status == "present":
+            result = client.create_application(name,
+                                               repository_url,
+                                               path,
+                                               target_revision,
+                                               values_files=values_files,
+                                               destination_server=destination_server,
+                                               namespace=namespace,
+                                               project=project)
         module.exit_json(changed=True, result=result)
     except requests.exceptions.HTTPError as errh:
         module.fail_json(msg=str(errh.response.json()))

@@ -1,17 +1,17 @@
-# argocd_create_application_playbook.yml
-- name: Add policy to role
+# argocd_create_project_playbook.yml
+- name: Create ArgoCD Project
   hosts: localhost
   connection: local
   gather_facts: false
   tasks:
-    - name: Add policy to role
-      bitertech.argocd.policy:
+    - name: Create ArgoCD Project
+      bitertech.argocd.project:
         api_url: "http://argocd.localhost/api/v1"
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
-        project_name: "my-project"
-        role_name: "my-new-role2"
-        policies: 
-          - "p, proj:my-project:my-new-role2, applications, get, my-project/*, allow"
+        name: "my-project"
+        description: "my project description 2"
+        status: "update"
+
       register: result
 
     - name: Debug
