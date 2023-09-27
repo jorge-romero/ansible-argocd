@@ -364,3 +364,39 @@ class ArgoCDClient:
 
         updated_project_data.raise_for_status()
         return updated_project_data.json(), None
+
+    def add_remove_repositories_from_project(self, project_name, repositories, status):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        project_data.raise_for_status()
+
+        # Step 2: Parse the JSON response
+        project_json = project_data.json()
+
+        # Step 3: Add/Remove the new repositories data to the "repositories" section
+        project_repositories = project_json.get(
+            "spec", {}).get("sourceRepos", [])
+
+        if status == "present":
+            for repository in repositories:
+                if repository not in project_repositories:
+                    project_repositories.append(repository)
+
+        if status == "absent":
+            for repository in repositories:
+                if repository in project_repositories:
+                    project_repositories.remove(repository)
+
+        # Step 4: Update the project with the modified data
+        updated_project_data = requests.put(
+            f"{self.argo_api_url}/projects/{project_name}",
+            headers=self.headers,
+            data=json.dumps({"project": project_json}),
+            timeout=30
+        )
+
+        updated_project_data.raise_for_status()
+        return updated_project_data.json(), None

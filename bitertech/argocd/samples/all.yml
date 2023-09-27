@@ -33,3 +33,18 @@
     - name: Debug
       ansible.builtin.debug:
         var: result
+
+    - name: Add source repository to project
+      bitertech.argocd.project_source_repositories:
+        api_url: "http://argocd.localhost/api/v1"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
+        project_name: "project-name"
+        repositories:
+          - "git://my-repo"
+        status: "present"
+
+      register: result
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result        
