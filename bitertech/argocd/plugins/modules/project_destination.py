@@ -19,8 +19,8 @@ def main():
         "api_url": {"required": True, "type": 'str'},
         "token": {"required": True, "type": 'str'},
         "project_name": {"required": True, "type": 'str'},
-        "server": {"required": True, "type": 'str'},
-        "name": {"required": True, "type": 'str'},
+        "server": {"required": False, "type": 'str', "default": "*"},
+        "name": {"required": False, "type": 'str', "default": "*"},
         "namespace": {"required": True, "type": 'str'},
         "status": {"type": "str", "choices": ["present", "absent"], "default": "present"},
 
