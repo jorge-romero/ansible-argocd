@@ -288,3 +288,79 @@ class ArgoCDClient:
         response.raise_for_status()
 
         return response.json(), None
+
+    def add_destination_to_project(self, project_name, server, name, namespace):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        project_data.raise_for_status()
+
+        # Step 2: Parse the JSON response
+        project_json = project_data.json()
+
+        # Step 3: Add the new role data to the "roles" section
+        new_destination = {
+            "server": server,
+            "name": name,
+            "namespace": namespace,
+        }
+        if "spec" not in project_json:
+            project_json["spec"] = {}
+        if "destinations" not in project_json["spec"]:
+            project_json["spec"]["destinations"] = []
+
+        for destination in project_json["spec"]["destinations"]:
+            if destination.get("server") == server and destination.get("name") == name and destination.get("namespace") == namespace:
+                return project_data.json()
+
+        project_json["spec"]["destinations"].append(new_destination)
+
+        # Step 4: Update the project with the modified data
+        updated_project_data = requests.put(
+            f"{self.argo_api_url}/projects/{project_name}",
+            headers=self.headers,
+            data=json.dumps({"project": project_json}),
+            timeout=30
+        )
+
+        updated_project_data.raise_for_status()
+        return updated_project_data.json(), None
+
+    def remove_destination_from_project(self, project_name, server, name, namespace):
+        # Step 1: Get the project data
+        project_data = requests.get(f"{self.argo_api_url}/projects/{project_name}",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        project_data.raise_for_status()
+
+        # Step 2: Parse the JSON response
+        project_json = project_data.json()
+
+        if "spec" not in project_json:
+            return project_data.json(), None
+
+        if "destinations" not in project_json["spec"]:
+            return project_data.json(), None
+
+        # Step 3: Remove the destination
+        new_destination = {
+            "server": server,
+            "name": name,
+            "namespace": namespace,
+        }
+
+        project_json["spec"]["destinations"].remove(new_destination)
+
+        # Step 4: Update the project with the modified data
+        updated_project_data = requests.put(
+            f"{self.argo_api_url}/projects/{project_name}",
+            headers=self.headers,
+            data=json.dumps({"project": project_json}),
+            timeout=30
+        )
+
+        updated_project_data.raise_for_status()
+        return updated_project_data.json(), None

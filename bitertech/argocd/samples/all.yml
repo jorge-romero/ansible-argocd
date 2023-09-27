@@ -1,0 +1,35 @@
+# argocd_create_project_playbook.yml
+- name: Create ArgoCD Project
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Create ArgoCD Project
+      bitertech.argocd.project:
+        api_url: "http://argocd.localhost/api/v1"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
+        name: "project-name"
+        description: "project-name: description"
+        status: "present"
+
+      register: result
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result
+
+    - name: Add destination to project
+      bitertech.argocd.project_destination:
+        api_url: "http://argocd.localhost/api/v1"
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
+        project_name: "project-name"
+        server: "https://kubernetes.default.svc"
+        name: "*"
+        namespace: "dev"
+        status: "present"
+
+      register: result
+
+    - name: Debug
+      ansible.builtin.debug:
+        var: result
