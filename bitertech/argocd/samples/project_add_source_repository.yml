@@ -1,14 +1,17 @@
-# argocd_create_project_playbook.yml
-- name: Get project Info
+# argocd_create_application_playbook.yml
+- name: Add Role to Project
   hosts: localhost
   connection: local
   gather_facts: false
   tasks:
-    - name: Get project info
-      bitertech.argocd.project_info:
+    - name: Add source repository to project
+      bitertech.argocd.project_source_repositories:
         api_url: "http://argocd.localhost/api/v1"
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJ2aWV3bmV4dDphcGlLZXkiLCJuYmYiOjE2OTUyMTMxNDEsImlhdCI6MTY5NTIxMzE0MSwianRpIjoidG9rZW4yIn0.rv-vb3e6jrmZcVzxR4vqC-CDET-JGU1QX9wRofSNxaE"
-        name: "project-name"
+        project_name: "project-name"
+        repositories:
+          - "alñsdkfjñasdjfñaskjfñlas"
+        status: "present"
       register: result
 
     - name: Debug

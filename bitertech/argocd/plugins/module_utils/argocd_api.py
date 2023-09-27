@@ -268,18 +268,32 @@ class ArgoCDClient:
                           password,
                           project,
                           name):
+
+        repositories = requests.get(f"{self.argo_api_url}/repositories",
+                                    headers=self.headers,
+                                    timeout=30)
+
+        repositories.raise_for_status()
+
+        repositories_json = repositories.json()
+
+        if repositories_json["items"] is not None:
+            for repository in repositories_json["items"]:
+                if repository["repo"] == repository_url:
+                    return {"error": f"Repository {repository_url} already exists."}, None
+
         # Define the repository spec
         repository_spec = {
             "type": type,
             "repo": repository_url,
             "username": username,
-            "password": password,
-            "project": project
+            "password": password
         }
+        if project is not None:
+            repository_spec["project"] = project
         if type == "helm":
             repository_spec["name"] = name
 
-        # Create the repository
         response = requests.post(f"{self.argo_api_url}/repositories",
                                  headers=self.headers,
                                  data=json.dumps(repository_spec),
